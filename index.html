@@ -15,10 +15,10 @@
   <h2>📅 HLTV Match → Google Calendar</h2>
   <p>Paste a match URL below:</p>
   <input type="text" id="matchUrl" placeholder="https://hltv.org/matches/..." />
-  <button onclick="process()">Add to Google Calendar</button>
+  <button id="addEventBtn">Add to Google Calendar</button>
 
   <script>
-    async function process() {
+    document.getElementById("addEventBtn").addEventListener("click", async () => {
       const url = document.getElementById('matchUrl').value.trim();
       if (!url.includes("hltv.org/matches")) return alert("Invalid HLTV match URL");
 
@@ -51,7 +51,7 @@
       } catch (err) {
         alert("Error: " + err.message);
       }
-    }
+    });
   </script>
 </body>
 </html>

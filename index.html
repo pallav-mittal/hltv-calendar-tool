@@ -22,12 +22,14 @@
       const url = document.getElementById('matchUrl').value.trim();
       if (!url.includes("hltv.org/matches")) return alert("Invalid HLTV match URL");
 
+      const proxy = "https://corsproxy.io/?";
+
       try {
-        const res = await fetch(url);
+        const res = await fetch(proxy + encodeURIComponent(url));
         const text = await res.text();
 
         const titleMatch = text.match(/<meta property="og:title" content="([^"]+)"/);
-        const jsonMatch = text.match(/<script type="application\/ld\+json">([^<]+)<\/script>/);
+        const jsonMatch = text.match(/<script type="application\\/ld\\+json">([^<]+)<\\/script>/);
         if (!titleMatch || !jsonMatch) return alert("Could not extract data.");
 
         const title = titleMatch[1];

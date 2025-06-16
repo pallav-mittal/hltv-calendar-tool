@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HLTV to Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; max-width: 600px; margin: auto; }
+    input, button { font-size: 1rem; padding: 0.5rem; width: 100%; margin-top: 0.5rem; }
+    button { background-color: #4285F4; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #357ae8; }
+  </style>
+</head>
+<body>
+  <h2>📅 HLTV Match → Google Calendar</h2>
+  <p>Paste a match URL below:</p>
+  <input type="text" id="matchUrl" placeholder="https://hltv.org/matches/..." />
+  <button onclick="process()">Add to Google Calendar</button>
+
+  <script>
+    async function process() {
+      const url = document.getElementById('matchUrl').value.trim();
+      if (!url.includes("hltv.org/matches")) return alert("Invalid HLTV match URL");
+
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+
+        const titleMatch = text.match(/<meta property="og:title" content="([^"]+)"/);
+        const jsonMatch = text.match(/<script type="application\/ld\+json">([^<]+)<\/script>/);
+        if (!titleMatch || !jsonMatch) return alert("Could not extract data.");
+
+        const title = titleMatch[1];
+        const json = JSON.parse(jsonMatch[1]);
+        const startRaw = json.startDate;
+        const start = new Date(startRaw);
+        const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+
+        const pad = n => String(n).padStart(2, '0');
+        const fmt = d => d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) +
+                        'T' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+
+        const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+                       `&text=${encodeURIComponent(title)}` +
+                       `&dates=${fmt(start)}/${fmt(end)}` +
+                       `&details=${encodeURIComponent("Match link: " + url)}`;
+
+        window.open(calUrl, "_blank");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
